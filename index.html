@@ -1,48 +1,339 @@
-<!DOCTYPE html> 
-<html> 
-<body> 
+<!--The codes are designed and developed by YU QIAO. Copyright 2013 -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type"></meta>
+    <meta name="viewport" content="width-device-width, initial-scale=1"/>
+    <style media="screen" type="text/css">
+        .buttonRounded {
+            -moz-border-radius: 8px;
+            -webkit-border-radius: 8px;
+            border-radius: 8px;
+        }
 
-<div style="text-align:center"> 
-  <button onclick="playPause()">Play/Pause</button> 
-  <button onclick="makeBig()">Big</button>
-  <button onclick="makeSmall()">Small</button>
-  <button onclick="makeNormal()">Normal</button>
-  <br /> 
-  <video id="video1" width="420">
-    <source src="mov_bbb.mp4" type="video/mp4" />
-    <source src="mov_bbb.ogg" type="video/ogg" />
-    Your browser does not support HTML5 video.
-  </video>
-</div> 
+    </style>
+    <script type="text/javascript">
+        var names = ["杨", "王", "赖", "梁", "乔", "俞", "沈"];
+        var checks = [0, 0, 0, 0, 0, 0, 0, 0];
+        var players = [0, 0, 0, 0, 0, 0, 0, 0];
+        var isFinished = 0;
+        var scoreMode = 0; //0 upgrade mode  1 score mode
+        var scoreModeString = ""
+    </script>
+    <script language="javascript">
 
-<script type="text/javascript"> 
-var myVideo=document.getElementById("video1"); 
+        function modeChanged(radioID)
+        {
+            if (radioID == 'scoreGrade')
+                scoreMode = 0;
+            else
+                scoreMode = 1;
 
-function playPause()
-{ 
-if (myVideo.paused) 
-  myVideo.play(); 
-else 
-  myVideo.pause(); 
-} 
+            var radioScore = document.getElementById(radioID)
 
-function makeBig()
-{ 
-myVideo.width=560; 
-} 
+            scoreModeString = radioScore.value
+        }
 
-function makeSmall()
-{ 
-myVideo.width=320; 
-} 
+        function getModeSetting()
+        {
+            var radioScore = document.getElementById("scoreGrade")
 
-function makeNormal()
-{ 
-myVideo.width=420; 
-} 
-</script> 
+            if (radioScore.checked == 1)
+                scoreMode = 0;
+            else
+            {
+                scoreMode = 1;
+                radioScore = document.getElementById("scoreNumber")
+            }
 
-<p>Video courtesy of <a href="http://www.bigbuckbunny.org/" target="_blank">Big Buck Bunny</a>.</p>
-</body> 
+            scoreModeString = radioScore.value;
+        }
+
+        function newApp(divNameListID)
+        {
+            getModeSetting()
+
+            var parent = document.getElementById(divNameListID)
+
+            //delete all children
+            while(parent.hasChildNodes())
+            {
+                parent.removeChild(parent.firstChild);
+            }
+
+
+            for (var i=0; i<names.length; i++)
+            {
+                var namebutton = document.createElement("input");
+                namebutton.type = "button";
+                namebutton.name = "nameChecks";
+                namebutton.value = names[i]
+                namebutton.id = "nameChk"+ i;
+                var functionstring = "nameCheckClick('"+ namebutton.id + "')";
+                namebutton.onclick = new Function(functionstring);
+                namebutton.style.background = "#EEEEEE";
+                namebutton.style.width = "50px";
+                namebutton.style.height = "50px";
+                namebutton.style.fontSize = "30px";
+                namebutton.style["WebkitBorderRadius"] = "0"; // w3c
+
+                parent.appendChild(namebutton)
+            }
+
+            var newGameButton = document.createElement("input");
+            newGameButton.type = "button";
+            newGameButton.value = "新游戏" + "(" + scoreModeString + ")";
+            var functionstring = "newGameScoreRecorder('scoreRecorderTable', names)" ;
+            newGameButton.onclick = new Function(functionstring);
+            newGameButton.style.background = "#00FF00";
+            newGameButton.style.height = "50px";
+            newGameButton.style.fontSize = "30px";
+            newGameButton.style["WebkitBorderRadius"] = "0"; // w3c
+
+            parent.appendChild(newGameButton);
+
+
+        }
+
+        function newGameScoreRecorder(tableID, names)
+        {
+            isFinished = 0;
+            var playernames = [];
+                    
+            var index = 0;
+            for (var i=0; i<players.length; i++)
+            {
+                if (players[i] == 1)
+                    playernames[index++] = names[i];
+            }
+            
+            var table = document.getElementById(tableID);
+            
+            //delete all rows
+            var Parent = document.getElementById(tableID);
+            while(Parent.hasChildNodes())
+            {
+                Parent.removeChild(Parent.firstChild);
+            }
+            
+            var row = table.insertRow(0);
+            
+            for (var i=0; i<playernames.length; i++)
+            {
+                var cell = row.insertCell(i);
+                var namebutton = document.createElement("input");
+                namebutton.type = "button";
+                namebutton.name = "namebutton";
+                namebutton.value = playernames[i];
+                namebutton.id = "nameBtn"+ i;
+                var functionstring = "nameButtonClick('"+ namebutton.id + "')";
+                namebutton.onclick = new Function(functionstring);
+                namebutton.style.background = "#00FF00";
+                namebutton.style.width = "100%";
+                namebutton.style.height = "100%";
+                namebutton.style.fontSize = "30px";
+                namebutton.style["WebkitBorderRadius"] = "0"; // w3c
+                cell.appendChild(namebutton);
+                cell.align = "center";
+            }
+            
+            row = table.insertRow(1);
+            
+            for (var i=0; i<playernames.length; i++)
+            {
+                var cell = row.insertCell(i);
+                if (scoreMode == 0)
+                    cell.innerHTML = 2;
+                else
+                    cell.innerHTML = 0;
+                cell.align = "center";
+            }
+
+            var gamepanel = document.getElementById("gamePanel")
+
+            gamepanel.style.display = "block"
+        }
+
+        function addNewRound(tableID)
+        {
+            if (isFinished == 1)
+                return;
+                
+            var ddlLevels = document.getElementById("ddlLevels");
+            var raiseLevel = ddlLevels.options[ddlLevels.selectedIndex].value;
+            
+            var table = document.getElementById(tableID);
+            
+            var isCheckedWinner = 0;
+            for (var i=0; i<checks.length; i++)
+                if (checks[i] == 1)
+                {
+                    isCheckedWinner = 1;
+                    break;
+                }
+                
+            if (isCheckedWinner == 0)
+                return;
+            
+            var newrow = table.insertRow(1);            
+            for (var i=0; i<table.rows[0].cells.length; i++)
+            {
+                var cellHead = table.rows[0].cells[i];
+                var cellfirstrow = table.rows[2].cells[i];
+                cellfirstrow.style.color = "#000000";
+                
+                var currentLevel;
+                if (scoreMode == 0)
+                    currentLevel = convertToCardNumber(cellfirstrow.innerHTML);
+                else
+                    currentLevel = parseInt(cellfirstrow.innerHTML);
+                
+                var cell = newrow.insertCell(i);
+                
+                var elements = document.getElementsByName("namebutton");
+                
+                if (checks[i] == "1")
+                {
+                    if (scoreMode == 0)
+                        cell.innerHTML = convertToCardString(currentLevel + parseInt(raiseLevel));
+                    else
+                        cell.innerHTML = currentLevel + parseInt(raiseLevel) * 2;
+
+                    cell.style.color = "#FF0000";
+                    elements[i].style.color = "#000000";
+                    elements[i].style.background = "#00FF00";
+                    checks[i] = 0;
+                }
+                else
+                    cell.innerHTML = convertToCardString(currentLevel);
+                cell.align = "center";
+            }            
+            
+        }
+        
+        function nameButtonClick(buttonid)
+        {
+            var button = document.getElementById(buttonid);
+            var id = buttonid.substr(buttonid.length-1);            
+
+            if (checks[parseInt(id)] == 0)
+            {
+                button.style.color = "#FFFFFF";
+                button.style.background = "#FF0000";
+                checks[parseInt(id)] = 1;
+            }
+            else
+            {
+                button.style.color = "#000000";
+                button.style.background = "#00FF00";
+                checks[parseInt(id)] = 0;
+            }
+        }
+            
+        function nameCheckClick(buttonid)
+        {
+            var button = document.getElementById(buttonid);
+            var id = buttonid.substr(buttonid.length-1);            
+
+            if (players[parseInt(id)] == 0)
+            {
+                button.style.color = "#FFFFFF";
+                button.style.background = "#FF0000";
+                players[parseInt(id)] = 1;
+            }
+            else
+            {
+                button.style.color = "#000000";
+                button.style.background = "#C0C0C0";
+                players[parseInt(id)] = 0;
+            }
+        }    
+        
+        function undoLastRound(tableID)
+        {
+            var table = document.getElementById(tableID);
+            
+            if (table.rows.length > 2)
+                table.deleteRow(1);
+        }
+        
+        function convertToCardString(cardnumber)
+        {
+            if (cardnumber <= 10)
+                return "" + cardnumber;
+            else if (cardnumber == 11)
+                return 'J';
+            else if (cardnumber == 12)
+                return 'Q';
+            else if (cardnumber == 13)
+                return 'K';
+            else if (cardnumber == 14)
+                return 'A';
+            else if (cardnumber == 15)
+                return 'JOKER';
+            else if (cardnumber > 15)
+            {
+                isFinished = 1;
+                return 'WINNER';
+            }
+        }
+        
+        function convertToCardNumber(cardstring)
+        {
+            if (cardstring == 'J')
+                return 11;
+            else if (cardstring == 'Q')
+                return 12;
+            else if (cardstring == 'K')
+                return 13;
+            else if (cardstring == 'A')
+                return 14;
+            else if (cardstring == 'JOKER')
+                return 15;
+            else
+                return parseInt(cardstring);
+        }
+    </script>
+</head>
+<body style="font-size:30px; font-weight:bold">
+    <div id="setScoreMode" style="margin:0 auto;width:220px;">
+        <font size="3">
+            <fieldset data-role="controlgroup" data-type="horizontal" id="scoreMode" name="gameWinMode">
+               <legend>获胜模式 :</legend>
+               <input type="radio" name="scoreGroup" id="scoreGrade" value="进级模式" checked="checked" onclick="modeChanged('scoreGrade')"/>
+               <label for="scoreGrade">进级模式</label>
+               <input type="radio" name="scoreGroup" id="scoreNumber" value="积分模式" onclick="modeChanged('scoreNumber')"/>
+               <label for="scoreNumber">积分模式</label>
+            </fieldset>
+        </font>      
+    </div>
+
+    <div id="newApp" style="margin:0 auto;width:100px;">
+        <input type="button" value="开始" class="buttonRounded" style="font-size:1em; font-weight:bold" onclick="newApp('nameList')"/>
+    </div>
+
+    <div id="nameList" style="margin:0 auto;" width="100%">
+    </div>
+
+    <div id="gamePanel" style="display:none">
+
+        <div>
+            <input type="button" value="下一轮" style="font-size:30px; font-weight:bold" onclick="addNewRound('scoreRecorderTable')"/>
+            <select id="ddlLevels" style="font-size:25px; font-weight:bold">
+                  <option value="1">升 1 级</option>
+                  <option value="2">升 2 级</option>
+                  <option value="3">升 3 级</option>
+                  <option value="4">升 4 级</option>
+                  <option value="5">升 5 级</option>
+                  <option value="6">升 6 级</option>
+                  <option value="7">升 7 级</option>
+                  <option value="8">升 8 级</option>
+                  <option value="9">升 9 级</option>
+            </select> 
+            <input type="button" value="Undo last round" style="font-size:30px; font-weight:bold" onclick="undoLastRound('scoreRecorderTable')"/>
+        </div>
+        <table id="scoreRecorderTable" width="100%" border="1px">
+        </table>       
+    </div>
+</body>
 </html>
-
